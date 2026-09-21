@@ -18,15 +18,19 @@ def load_agent(path):
 def main():
     seeds = [int(value) for value in sys.argv[1:]] or list(range(1, 101))
     baseline = load_agent(Path(".baseline-three-cow/main.py"))
-    margins = []
+    forward_margins, reverse_margins = [], []
     for seed in seeds:
         forward = run(seed, agents=(candidate, baseline))
         reverse = run(seed, agents=(baseline, candidate))
-        margin = (forward[0] - forward[1] + reverse[1] - reverse[0]) / 2
-        margins.append(margin)
-        print(f"seed={seed} paired_margin={margin:.0f}")
-    print(f"mean paired margin={sum(margins) / len(margins):.1f} "
-          f"wins={sum(margin > 0 for margin in margins)}/{len(margins)}")
+        forward_margin = forward[0] - forward[1]
+        reverse_margin = reverse[1] - reverse[0]
+        forward_margins.append(forward_margin)
+        reverse_margins.append(reverse_margin)
+        print(f"seed={seed} seat0_margin={forward_margin:.0f} "
+              f"seat1_margin={reverse_margin:.0f}")
+    for label, margins in (("seat0", forward_margins), ("seat1", reverse_margins)):
+        print(f"{label} mean={sum(margins) / len(margins):.1f} "
+              f"wins={sum(margin > 0 for margin in margins)}/{len(margins)}")
 
 
 if __name__ == "__main__":

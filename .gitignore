@@ -3,6 +3,7 @@
 __pycache__/
 live-replays/
 leaderboard-current/
+leaderboard-latest/
 .baseline-three-cow/
 *.zip
 *.pyc
