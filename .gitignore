@@ -1,0 +1,6 @@
+.kaggle/
+.vendor/
+__pycache__/
+live-replays/
+*.zip
+*.pyc
