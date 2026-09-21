@@ -279,13 +279,12 @@ def _market_actions(farm, private, prices, day, crop_choice):
     if day >= 16 and geese_owned < 4 and shed.get("GOOSE", 0) < 1 and money > 8000 and _market_score("EGG", prices) >= 1.05:
         orders.append(["BUY_ANIMAL", "GOOSE", 1])
 
-    # A single early cow has time to mature and is substantially more valuable
-    # than a late expansion.  Keep this deliberately capped at one until replay
-    # evidence shows that a one-worker feeding route can support more.
+    # Dairy remains the highest-return compact production route.  Three cows
+    # fit within the farmer's daily care window without starving harvests.
     cows_owned = sum(1 for row in _tiles(farm) for tile in row
                      if isinstance(tile, dict) and tile.get("animal") == "COW")
-    if (8 <= day <= 13 and cows_owned < 1 and shed.get("COW", 0) < 1 and
-            money > 2500 and _market_score("MILK", prices) >= 0.9):
+    if (8 <= day <= 13 and cows_owned < 3 and shed.get("COW", 0) < 1 and
+            money > 1300 and _market_score("MILK", prices) >= 0.9):
         orders.append(["BUY_ANIMAL", "COW", 1])
 
     # One affordable hand during the productive middle converts idle travel into care.
