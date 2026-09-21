@@ -29,7 +29,7 @@ def load_official(seed):
     return namespace
 
 
-def run(seed=20260921, trace=False):
+def run(seed=20260921, trace=False, agents=None):
     game = load_official(seed)
     configuration = Dot(boardSize=10, startingMoney=3000, episodeSteps=721,
                         turnsPerDay=24, maxMarketOrdersPerTurn=10,
@@ -43,10 +43,11 @@ def run(seed=20260921, trace=False):
     for step in range(720):
         state[0].observation.step = step
         state[1].observation.step = step
-        state[0].action = agent(state[0].observation)
+        active_agents = agents or (agent, game["starter_agent"])
+        state[0].action = active_agents[0](state[0].observation)
         if trace and 192 <= step <= 199:
             print("trace", step, state[0].observation.farms[0]["farmer"], state[0].action)
-        state[1].action = game["starter_agent"](state[1].observation)
+        state[1].action = active_agents[1](state[1].observation)
         game["interpreter"](state, env)
     first, second = state[0].reward, state[1].reward
     assert first >= 0 and second >= 0
