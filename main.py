@@ -214,6 +214,11 @@ def _unit_action(pos, index, farm, private, day, crop_choice, board_size):
         elif tile.get("kind") == "WEED":
             return ["DIG"]
     elif tile is None:
+        # Build the matching enclosure before consuming this space with a seed.
+        # This also lets cows and sheep use the same safe placement flow as geese.
+        carried_animal = next((animal for animal in ANIMALS if inventory.get(animal, 0)), None)
+        if carried_animal:
+            return ["BUILD_" + ANIMALS[carried_animal]["structure"]]
         if seeds.get(crop_choice, 0):
             return ["PLANT", crop_choice]
         # A tiny near-shed goose block produces uncrashable eggs and fertilizer.
@@ -273,6 +278,15 @@ def _market_actions(farm, private, prices, day, crop_choice):
     # stable crop engine and a high price signal must both exist first.
     if day >= 16 and geese_owned < 4 and shed.get("GOOSE", 0) < 1 and money > 8000 and _market_score("EGG", prices) >= 1.05:
         orders.append(["BUY_ANIMAL", "GOOSE", 1])
+
+    # A single early cow has time to mature and is substantially more valuable
+    # than a late expansion.  Keep this deliberately capped at one until replay
+    # evidence shows that a one-worker feeding route can support more.
+    cows_owned = sum(1 for row in _tiles(farm) for tile in row
+                     if isinstance(tile, dict) and tile.get("animal") == "COW")
+    if (8 <= day <= 13 and cows_owned < 1 and shed.get("COW", 0) < 1 and
+            money > 2500 and _market_score("MILK", prices) >= 0.9):
+        orders.append(["BUY_ANIMAL", "COW", 1])
 
     # One affordable hand during the productive middle converts idle travel into care.
     hands = _get(farm, "hands", []) or []
